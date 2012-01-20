@@ -263,3 +263,45 @@ func (e *Event) Poll() int {
 func (e *Event) Peek(timeout int) int {
 	return PeekEvent(e, timeout)
 }
+
+// Advanced output facility. Implements io.Writer, and can thus be use as an
+// argument to the formatted output functions of package fmt.
+//
+// TODO TermWriter should be threadsafe.
+// TODO Handle resizing in some nice way.
+type TermWriter struct {
+	x  int
+	y  int
+	fg uint16
+	bg uint16
+	i int
+}
+
+// Returns a writer starting at the specified position and with the given
+// foreground and background colors.
+func Writer(x int, y int, fg uint16, bg uint16) *TermWriter {
+	return &TermWriter{
+		x, y, fg, bg, 0,
+	}
+}
+
+func (w *TermWriter) Write(p []byte) (n int, err error) {
+	n = len(p)
+	c := string(p)
+	for _, r := range c {
+		ChangeCell(w.x + w.i, w.y, r, w.fg, w.bg)
+		w.i++
+	}
+	return
+}
+
+// Reset all position information.
+func (w *TermWriter) Reset() {
+	w.i = 0
+}
+
+// Set the foreground and background to be used.
+func (w *TermWriter) Color(fg uint16, bg uint16) {
+	w.fg = fg
+	w.bg = bg
+}
