@@ -264,6 +264,13 @@ func (e *Event) Peek(timeout int) int {
 	return PeekEvent(e, timeout)
 }
 
+// Shortcut function for writing a string beginning at a given cell.
+func WriteAt(x, y int, str string, fg, bg uint16) {
+	for i, r := range str {
+		ChangeCell(x + i, y, r, fg, bg)
+	}
+}
+
 // Advanced output facility. Implements io.Writer, and can thus be use as an
 // argument to the formatted output functions of package fmt.
 //
