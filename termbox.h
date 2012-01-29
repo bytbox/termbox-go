@@ -129,6 +129,7 @@ struct tb_event {
 #define TB_EUNSUPPORTED_TERMINAL	-1
 #define TB_EFAILED_TO_OPEN_TTY		-2
 #define TB_EPIPE_TRAP_ERROR		-3
+#define TB_ERUNNING                     -4
 
 SO_IMPORT int tb_init();
 SO_IMPORT void tb_shutdown();

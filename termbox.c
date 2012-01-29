@@ -24,6 +24,8 @@ struct cellbuf {
 
 #define LAST_COORD_INIT 0xFFFFFFFE
 
+static char running = 0;
+
 static struct termios orig_tios;
 
 static struct cellbuf back_buffer;
@@ -68,6 +70,9 @@ static volatile int buffer_size_change_request;
 
 int tb_init()
 {
+	if (running)
+		return TB_ERUNNING;
+
 	out = fopen("/dev/tty", "w");
 	in = fopen("/dev/tty", "r");
 
@@ -115,11 +120,14 @@ int tb_init()
 	cellbuf_clear(&front_buffer);
 	init_ringbuffer(&inbuf, 4096);
 
+	running = 1;
+
 	return 0;
 }
 
 void tb_shutdown()
 {
+	if (!running) return;
 	fputs(funcs[T_SHOW_CURSOR], out);
 	fputs(funcs[T_SGR0], out);
 	fputs(funcs[T_CLEAR_SCREEN], out);
@@ -136,6 +144,7 @@ void tb_shutdown()
 	cellbuf_free(&back_buffer);
 	cellbuf_free(&front_buffer);
 	free_ringbuffer(&inbuf);
+	running = 0;
 }
 
 void tb_present()
